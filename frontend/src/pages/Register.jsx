@@ -66,26 +66,7 @@ const Register = () => {
         console.error(error);
         throw error;
       });
-      //   await axios
-      //     .post("http://localhost:3000/api/users/register", user)
-      //     .than((res) => {
-      //       console.log(res);
-      //       setStatus(res.statusText === "OK" ? true : false);
-      //     })
-      //     .catch((error) => {
-      //       if (error.response) {
-      //         setErrors({ ...errors, res: error.response.data.errors[0].msg });
-      //         console.log("error.response");
-      //       }
-      //       // handle validation errors
-      //       const newErrors = {};
-      //       if (error.name === "ValidationError") {
-      //         error.inner.forEach((err) => {
-      //           newErrors[err.path] = err.message;
-      //         });
-      //         setErrors(newErrors);
-      //       }
-      //     });
+
       setStatus(res.statusText === "Created" ? true : false);
 
       if (res.statusText === "Created") {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Nav from "../components/Nav";
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
@@ -18,6 +19,7 @@ const Chat = () => {
 
   return (
     <div className='flex flex-col h-screen bg-gray-100'>
+      <Nav />
       <div className='flex-1 p-4 overflow-y-auto'>
         {messages.map((message, index) => (
           <div key={index} className='mb-2'>
