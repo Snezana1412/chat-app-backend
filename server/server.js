@@ -15,7 +15,7 @@ const __dirname = path.resolve();
 
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors({ credentials: true, origin: "http://localhost:3001" }));
 app.use(express.json()); // to parse the incoming requests with JSON payloads (from req.body)
 app.use(cookieParser());
 
