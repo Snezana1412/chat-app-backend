@@ -24,7 +24,10 @@ function App() {
             <Route path='/' element={<Login />} />
             <Route path='/login' element={<Login />} />
             <Route path='/register' element={<Register />} />
-            <Route path='/verification' element={<Verification />} />
+            <Route
+              path='/verification/:vtoken/:uid'
+              element={<Verification />}
+            />
             <Route path='/forgot-password' element={<ForgotPassword />} />
           </Routes>
         </AuthProvider>

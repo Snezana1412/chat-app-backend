@@ -36,6 +36,10 @@ const userSchema = new Schema({
     default:
       "https://www.kindpng.com/picc/m/78-785827_user-profile-avatar-login-account",
   },
+  create_at: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 // Hash the password before saving the user
@@ -65,7 +69,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 const User = model("User", userSchema);
 
 /* ------------ verification token ------------ */
-const verify_token_schema = new Schema({
+const verifySchema = new Schema({
   token: {
     type: String,
     required: true,
@@ -75,7 +79,11 @@ const verify_token_schema = new Schema({
     type: String,
     required: true,
   },
+  create_at: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
-export const Verify_token = model("Verify_token", verify_token_schema);
+export const verify = model("verify", verifySchema);
 export default User;

@@ -1,20 +1,21 @@
 import nodemailer from "nodemailer";
 import crypto from "crypto";
-import { Verify_token } from "../models/user.model.js";
+import { verify } from "../models/user.model.js";
 
 export const verification_token = async (user) => {
-  console.log(user);
+  console.log("verification_token:", user);
   try {
-    const token = crypto.randomBytes(20).toString("hex");
-    // const verify_token = new Verify_token({
+    const ver_token = crypto.randomBytes(20).toString("hex");
+    console.log("🚀 ~ constverification_token= ~ ver_token:", ver_token);
+    // const verify_token = new verify({
     //     token: token,
     //     userId: user._id,
     // });
     // await verify_token.save();
     // return token;
-    return await Verify_token.create({
+    return await verify.create({
       // create a new verification token
-      token: token,
+      token: ver_token,
       userId: user._id,
     });
   } catch (error) {
@@ -24,7 +25,11 @@ export const verification_token = async (user) => {
 
 /* ------ template for verification email ----- */
 export const genEmailTemplate = (name, token, userid) => {
-  const link = `https://localhost:5000/users/confirm/${token}/${userid}`;
+  //const link = `http://localhost:3000/api/users/confirm/${token}/${userid}`;
+  const link = `http://localhost:3001/verification/${token}/${userid}`;
+  console.log(link, "link");
+  console.log(token, "token");
+  console.log(userid, "userid");
   return `
         Hi ${name}!<br/><br/>
         Thank you for joining us. Please click on the following link to confirm and activate your account: <br />
@@ -48,28 +53,29 @@ export const send_activate_email = async function (user, token) {
         pass: process.env.password,
       },
     });
+    console.log(user.fullName, token.token, token.userId);
     // send email
     let mailOptions = {
       from: process.env.email,
       to: user.email,
       subject: "Verify your account!",
-      html: genEmailTemplate(user.fullName, token, user._id),
+      html: genEmailTemplate(user.fullName, token.token, token.userId),
     };
     const info = await transporter.sendMail(
       {
         from: process.env.email,
         to: user.email,
-        subject: "Verify Your Blog Account! 😊",
-        html: genEmailTemplate(user.fullName, token, user._id),
+        subject: "Verify Your Chat Account! 😊",
+        html: genEmailTemplate(user.fullName, token.token, token.userId),
+      },
+      (err, info) => {
+        console.log(mailOptions);
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(info);
+        }
       }
-      //   mailOptions, (err, info) => {
-      //   console.log(mailOptions);
-      //   if (err) {
-      //     console.log(err);
-      //   } else {
-      //     console.log(info);
-      //   }
-      // }
     );
 
     //return info;

@@ -1,4 +1,4 @@
-import User, { Verify_token } from "../models/user.model.js";
+import User, { verify } from "../models/user.model.js";
 import {
   createError,
   send_activate_email,
@@ -54,21 +54,36 @@ export const register = async (req, res, next) => {
 /* ------------ handle verify link ------------ */
 export const handleVerifyLink = async (req, res, next) => {
   try {
-    const { token, uid } = req.params;
+    //const { token, uid } = req.params;
+
+    const vtoken = req.params.token;
+    const vuid = req.params.uid;
+    console.log("🚀 ~ handleVerifyLink ~ uid:", vuid);
+    console.log("🚀 ~ handleVerifyLink ~ token:", vtoken);
 
     // find the verification token
-    const verify_token = await Verify_token.findOne({ token, uid });
+    const verify_token = await verify.findOne({ token: vtoken, userId: vuid });
+    console.log("🚀 ~ handleVerifyLink ~ verify_token:", verify_token);
     if (!verify_token) {
       throw createError("verification link is not valid!", 404);
     }
 
     // if the token is valid and user clicked, activate the user
     console.log(verify_token, "verify_token");
-    const user = await User.findOneAndUpdate(
-      { _id: token_doc.userId },
-      { is_activated: true }
-    );
-    res.send("User actived successfully!");
+    // const user = await User.findOneAndUpdate(
+    //   { _id: token_doc.userId },
+    //   { is_activated: true }
+    // );
+    // res.send("User actived successfully!");
+    // find a user and activate him/her
+    const findUser = await User.findById(verify_token.userId);
+    if (!findUser) {
+      throw createError("User already deleted!", 401);
+    }
+    findUser.is_activated = true;
+    await findUser.save();
+
+    res.json({ status: "verify-account-success" });
   } catch (error) {
     next(error);
   }
@@ -78,8 +93,10 @@ export const handleVerifyLink = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
+    console.log("🚀 ~ login ~ username, password:", username, password);
     // find user by username
     const user = await User.findOne({ username, is_activated: true });
+    console.log("🚀 ~ login ~ user:", user);
     if (!user) {
       throw createError("Incorrect username/password!", 403);
     }
