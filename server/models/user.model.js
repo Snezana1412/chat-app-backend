@@ -85,5 +85,5 @@ const verifySchema = new Schema({
   },
 });
 
-export const verify = model("verify", verifySchema);
+export const verify = model("Verify", verifySchema);
 export default User;

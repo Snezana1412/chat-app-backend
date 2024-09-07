@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import { app, server } from "./socket/socket.js";
 
 import userRoutes from "./routes/user.route.js";
+import messageRoutes from "./routes/message.route.js";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(cors({ credentials: true, origin: "http://localhost:3001" }));
 app.use(express.json()); // to parse the incoming requests with JSON payloads (from req.body)
 app.use(cookieParser());
 
+app.use("/api/messages", messageRoutes);
 app.use("/api/users", userRoutes);
 
 app.use(express.static(path.join(__dirname, "public")));
