@@ -47,7 +47,7 @@ export const protect = async (req, res, next) => {
 
     // extract token from req.cookies
     const token = req.cookies.jwt_token;
-    console.log("🚀 ~ protect ~ token:", token);
+
     if (!token) {
       res.status(400).json({
         status: "failure",
@@ -57,7 +57,6 @@ export const protect = async (req, res, next) => {
 
     // verify token
     const token_payload = await verifyToken(token, process.env.JWT_SECRET);
-    console.log("🚀 ~ protect ~ token_payload:", token_payload);
 
     // verify the payload
     const userId = await User.findById(token_payload.userId);

@@ -3,16 +3,22 @@ import Message from "../models/message.model.js";
 import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const sendMessage = async (req, res) => {
-  const { sender, receiver, text } = req.body;
+  const { senderId, receiverId, message } = req.body;
+  console.log(
+    "🚀 ~ sendMessage ~  sender, receiver, text:",
+    senderId,
+    receiverId,
+    message
+  );
 
   try {
     let conversation = await Conversation.findOne({
-      members: { $all: [sender, receiver] },
+      members: { $all: [senderId, receiverId] },
     });
 
     if (!conversation) {
       conversation = new Conversation({
-        members: [sender, receiver],
+        members: [senderId, receiverId],
         messages: [],
       });
 
@@ -20,24 +26,26 @@ export const sendMessage = async (req, res) => {
     }
 
     const newMessage = new Message({
-      sender,
-      receiver,
-      text,
+      senderId,
+      receiverId,
+      message,
       conversation: conversation._id,
     });
+    console.log("🚀 ~ sendMessage ~ newMessage:", newMessage);
 
     await newMessage.save();
 
     conversation.messages.push(newMessage._id);
     await conversation.save();
 
-    const receiverSocketId = getReceiverSocketId(receiver);
+    const receiverSocketId = getReceiverSocketId(receiverId);
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("message", newMessage);
     }
 
     res.status(201).json(newMessage);
   } catch (error) {
+    console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
@@ -45,13 +53,16 @@ export const sendMessage = async (req, res) => {
 export const getMessages = async (req, res) => {
   //const { sender, receiver } = req.query;
 
-  const { id: userToChatId } = req.params;
-  const sender = req.user._id;
-  const receiver = userToChatId;
+  const { userId, receiverId } = req.query;
+  console.log("🚀 ~ getMessages ~ userId, receiverId", userId, receiverId);
+
+  // const { id: userToChatId } = req.params;
+  // const sender = req.user._id;
+  // const receiver = userToChatId;
 
   try {
     const conversation = await Conversation.findOne({
-      members: { $all: [sender, receiver] },
+      members: { $all: [userId, receiverId] },
     }).populate("messages");
 
     if (!conversation) return res.status(200).json([]);

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import axios from "axios";
-import useAuth from "../context/useAuth";
+import useAuth from "../hooks/useAuth";
 
 const Login = () => {
   const { login } = useAuth();
@@ -54,7 +54,7 @@ const Login = () => {
       setStatus(res.status === 200 ? true : false);
       console.log(res.data);
       login(res.data.user);
-      navigate("/chat");
+      navigate("/chat-app");
     } catch (error) {
       // backend error
       if (error.response) {
@@ -75,7 +75,7 @@ const Login = () => {
   };
 
   return status ? (
-    <Navigate to='/posts' replace={true} />
+    <Navigate to='/chat-app' replace={true} />
   ) : (
     <div className='flex justify-center items-center h-screen bg-gray-100'>
       <div className='w-full max-w-md'>

@@ -30,7 +30,7 @@ export const register = async (req, res, next) => {
       gender,
     });
 
-    console.log(newUser, "newUser");
+    //console.log(newUser, "newUser");
 
     // remove critical data from the response
     newUser.password = undefined;
@@ -58,18 +58,18 @@ export const handleVerifyLink = async (req, res, next) => {
 
     const vtoken = req.params.token;
     const vuid = req.params.uid;
-    console.log("🚀 ~ handleVerifyLink ~ uid:", vuid);
-    console.log("🚀 ~ handleVerifyLink ~ token:", vtoken);
+    // console.log("🚀 ~ handleVerifyLink ~ uid:", vuid);
+    // console.log("🚀 ~ handleVerifyLink ~ token:", vtoken);
 
     // find the verification token
     const verify_token = await verify.findOne({ token: vtoken, userId: vuid });
-    console.log("🚀 ~ handleVerifyLink ~ verify_token:", verify_token);
+    // console.log("🚀 ~ handleVerifyLink ~ verify_token:", verify_token);
     if (!verify_token) {
       throw createError("verification link is not valid!", 404);
     }
 
     // if the token is valid and user clicked, activate the user
-    console.log(verify_token, "verify_token");
+    // console.log(verify_token, "verify_token");
     // const user = await User.findOneAndUpdate(
     //   { _id: token_doc.userId },
     //   { is_activated: true }

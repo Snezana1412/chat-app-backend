@@ -11,77 +11,64 @@ import IconMenu from "../components/Icon/IconMenu";
 import IconMessage from "../components/Icon/IconMessage";
 import IconMoodSmile from "../components/Icon/IconMoodSmile";
 import IconSend from "../components/Icon/IconSend";
+import { useUserContext } from "../context/AuthProvider";
+import useGetConversations from "../hooks/useGetConversations";
+import useConversation from "../state/useConversation";
+import { useSocketContext } from "../context/SocketContext";
+import Header from "../components/Header";
+import Footer from "../components/Footer";
+import { formatLastOnline } from "../utils/formatLastOnline";
+import { getMessages } from "../utils/api";
 
 const user = localStorage.getItem("user");
 
 function ChatPage() {
-  const [contactList, setContactList] = useState([]);
-  // const [chatList, setChatList] = useState([]);
-  // const [selectedContact, setSelectedContact] = useState(null);
-  // const [message, setMessage] = useState("");
-  // const [conversation, setConversation] = useState(null);
-  const [currentUser, setCurrentUser] = useState(JSON.parse(user));
+  //   router.route("/:id").get(protect, getMessages);
+  // //router.route("/").post(protect, sendMessage);
+  // router.post("/send/:id", protectRoute, sendMessage);
+
+  const context = useUserContext();
+  console.log("🚀 ~ ChatPage ~ context:", context);
+  const currentUser = context.user;
+
+  const { loading, conversations } = useGetConversations();
+  const { selectedConversation, setSelectedConversation } = useConversation();
+
+  const { onlineUsers } = useSocketContext();
+  console.log("🚀 ~ ChatPage ~ onlineUsers:", onlineUsers);
+
+  useEffect(() => {
+    onlineUsers.forEach((user) => {
+      const userIndex = conversations.findIndex((d) => d._id === user);
+
+      if (userIndex !== -1) {
+        conversations[userIndex].active = true;
+      }
+    });
+  }, [onlineUsers, conversations]);
 
   const [isShowChatMenu, setIsShowChatMenu] = useState(false);
   const [searchUser, setSearchUser] = useState("");
+  console.log("🚀 ~ ChatPage ~ searchUser:", searchUser);
   const [isShowUserChat, setIsShowUserChat] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [textMessage, setTextMessage] = useState("");
-  const [filteredItems, setFilteredItems] = useState([]);
+  const [filteredItems, setFilteredItems] = useState(conversations);
+
+  const socketContext = useSocketContext();
+  console.log("🚀 ~ ChatPage ~ socketContext:", socketContext);
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
 
   const isDark = false;
 
-  console.log(currentUser);
-
-  // const getCurrentUser = async () => {
-  //   const { data } = await axios.get("/api/users/me");
-  //   setCurrentUser(data);
-  // };
   useEffect(() => {
-    const fetchContacts = async () => {
-      const { data } = await axios({
-        url: "http://localhost:3000/api/users",
-        withCredentials: true,
-        method: "GET",
-      });
-      setContactList(data);
-      setFilteredItems(data);
-      console.log(data);
-    };
-    fetchContacts();
-  }, []);
-
-  // get current user from context
-  useEffect(() => {
-    // getCurrentUser();
-  }, [currentUser]);
-
-  const filterUsers = (e) => {
-    const keyword = e.target.value;
-    if (keyword !== "") {
-      const results = contactList.filter((user) => {
-        return user.name.toLowerCase().startsWith(keyword.toLowerCase());
-      });
-      setFilteredItems(results);
-    } else {
-      setFilteredItems(contactList);
-    }
-  };
-  console.log(contactList);
-  console.log(filteredItems);
-
-  useEffect(() => {
-    // setFilteredItems(
-    //   contactList.filter((user) => {
-    //     return user.name.toLowerCase().includes(searchUser.toLowerCase());
-    //   })
-    // );
-    // setFilteredItems(() => {
-    //   return contactList?.filter((d) => {
-    //     return d?.name?.toLowerCase().includes(searchUser.toLowerCase());
-    //   });
-    // });
-  }, [searchUser, contactList]);
+    setFilteredItems(
+      conversations.filter((user) => {
+        return user.fullName.toLowerCase().includes(searchUser.toLowerCase());
+      })
+    );
+  }, [searchUser, conversations]);
 
   const scrollToBottom = () => {
     if (isShowUserChat) {
@@ -97,21 +84,66 @@ function ChatPage() {
     setIsShowUserChat(true);
     scrollToBottom();
     setIsShowChatMenu(false);
+    setSelectedConversation(user);
   };
-  const sendMessage = () => {
-    if (textMessage.trim()) {
-      let list = contactList;
-      let user = list.find((d) => d.userId === selectedUser.userId);
-      user.messages.push({
-        fromUserId: selectedUser.userId,
-        toUserId: 0,
-        text: textMessage,
-        time: "Just now",
+  // console.log(formatLastOnline(selectedUser.lastOnline));
+  // console.log(selectedUser);
+
+  // useEffect(() => {
+  //   const fetchMessages = async () => {
+  //     try {
+  //       const data = await getMessages(selectedUser?._id);
+  //       setMessages(data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch messages:", error);
+  //     }
+  //   };
+
+  //   fetchMessages();
+  // }, [selectedUser]);
+
+  const sendMessage = async () => {
+    console.log("selectUser", selectedUser);
+    console.log("textMessage", textMessage);
+    console.log("conversations", conversations);
+    console.log("selectedConversation", selectedConversation);
+
+    console.log("currentUser", currentUser);
+    try {
+      const response = await axios({
+        method: "POST",
+        url: `http://localhost:3000/api/messages/send/`,
+        data: {
+          senderId: currentUser._id,
+          receiverId: selectedUser._id,
+          message: textMessage,
+        },
+        withCredentials: true,
+      }).catch((error) => {
+        console.error(error);
+        throw error;
       });
-      //setFilteredItems(list);
-      setTextMessage("");
-      scrollToBottom();
+      console.log(response);
+
+      // setMessages((prevMessages) => [...prevMessages, newMessage]);
+      setText("");
+    } catch (error) {
+      console.error("Failed to send message:", error);
     }
+    // if (textMessage.trim()) {
+    //   let list = conversations;
+    //   let user = list.find((d) => d._id === selectedUser._id);
+    //   user.messages.push({
+    //     fromUserId: selectedUser._id,
+    //     toUserId: 0,
+    //     text: textMessage,
+    //     time: "Just now",
+    //   });
+
+    //   setFilteredItems(list);
+    //   setTextMessage("");
+    //   scrollToBottom();
+    // }
   };
   const sendMessageHandle = (event) => {
     if (event.key === "Enter") {
@@ -119,10 +151,41 @@ function ChatPage() {
     }
   };
 
-  console.log(filteredItems);
+  const getMessages = async (userId, receiverId) => {
+    try {
+      const response = await axios({
+        method: "GET",
+        url: `http://localhost:3000/api/messages/`,
+        params: {
+          userId,
+          receiverId,
+        },
+        withCredentials: true,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const data = await getMessages(currentUser._id, selectedUser._id);
+        console.log("messages", data);
+        setMessages(data);
+      } catch (error) {
+        console.error("Failed to fetch messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, [selectedUser, currentUser]);
 
   return (
     <div>
+      <Header />
       <div
         className={`flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full sm:min-h-0 ${
           isShowChatMenu ? "min-h-[999px]" : ""
@@ -211,11 +274,11 @@ function ChatPage() {
             <PerfectScrollbar className='chat-users relative h-full min-h-[100px] sm:h-[calc(100vh_-_357px)] space-y-0.5 ltr:pr-3.5 rtl:pl-3.5 ltr:-mr-3.5 rtl:-ml-3.5'>
               {filteredItems.map((person) => {
                 return (
-                  <div key={person.userId}>
+                  <div key={person._id}>
                     <button
                       type='button'
                       className={`w-full flex justify-between items-center p-2 hover:bg-gray-100 dark:hover:bg-[#050b14] rounded-md dark:hover:text-primary hover:text-primary ${
-                        selectedUser && selectedUser.userId === person.userId
+                        selectedUser && selectedUser._id === person._id
                           ? "bg-gray-100 dark:bg-[#050b14] dark:text-primary text-primary"
                           : ""
                       }`}
@@ -225,7 +288,6 @@ function ChatPage() {
                           <div className='flex-shrink-0 relative'>
                             <img
                               src={person.profilePicture}
-                              // src={`/assets/images/${person.path}`}
                               className='rounded-full h-12 w-12 object-cover'
                               alt=''
                             />
@@ -450,7 +512,7 @@ function ChatPage() {
                   </button>
                   <div className='relative flex-none'>
                     <img
-                      src={`/assets/images/${selectedUser.path}`}
+                      src={`/assets/images/${selectedUser.profilePicture}`}
                       className='rounded-full w-10 h-10 sm:h-12 sm:w-12 object-cover'
                       alt=''
                     />
@@ -459,11 +521,13 @@ function ChatPage() {
                     </div>
                   </div>
                   <div className='mx-3'>
-                    <p className='font-semibold'>{selectedUser.name}</p>
+                    <p className='font-semibold'>{selectedUser.fullName}</p>
                     <p className='text-white-dark text-xs'>
+                      {}
                       {selectedUser.active
                         ? "Active now"
-                        : "Last seen at " + selectedUser.time}
+                        : "Last seen at " +
+                          formatLastOnline(selectedUser.lastOnline).lastSeen}
                     </p>
                   </div>
                 </div>
@@ -525,28 +589,28 @@ function ChatPage() {
                   <div className='block m-6 mt-0'>
                     <h4 className='text-xs text-center border-b border-[#f4f4f4] dark:border-gray-800 relative'>
                       <span className='relative top-2 px-3 bg-white dark:bg-black'>
-                        {"Today, " + selectedUser.time}
+                        {"Today, " + "selectedUser.time"}
                       </span>
                     </h4>
                   </div>
-                  {selectedUser.messages && selectedUser.messages.length ? (
+                  {messages && messages.length ? (
                     <>
-                      {selectedUser.messages.map((message, index) => {
+                      {messages.map((message, index) => {
                         return (
                           <div key={index}>
                             <div
                               className={`flex items-start gap-3 ${
-                                selectedUser.userId === message.fromUserId
+                                currentUser.userId === message.senderId
                                   ? "justify-end"
                                   : ""
                               }`}>
                               <div
                                 className={`flex-none ${
-                                  selectedUser.userId === message.fromUserId
+                                  selectedUser.userId === message.senderId
                                     ? "order-2"
                                     : ""
                                 }`}>
-                                {selectedUser.userId === message.fromUserId ? (
+                                {selectedUser.userId === message.senderId ? (
                                   <img
                                     src={`/assets/images/${currentUser.profilePicture}`}
                                     className='rounded-full h-10 w-10 object-cover'
@@ -555,9 +619,9 @@ function ChatPage() {
                                 ) : (
                                   ""
                                 )}
-                                {selectedUser.userId !== message.fromUserId ? (
+                                {selectedUser.userId !== message.senderId ? (
                                   <img
-                                    src={`/assets/images/${selectedUser.path}`}
+                                    src={`/assets/images/${selectedUser.profilePicture}`}
                                     className='rounded-full h-10 w-10 object-cover'
                                     alt=''
                                   />
@@ -573,11 +637,11 @@ function ChatPage() {
                                         ? "ltr:rounded-br-none rtl:rounded-bl-none !bg-primary text-white"
                                         : "ltr:rounded-bl-none rtl:rounded-br-none"
                                     }`}>
-                                    {message.text}
+                                    {message.message}
                                   </div>
                                   <div
                                     className={`${
-                                      selectedUser.userId === message.fromUserId
+                                      selectedUser.userId === message.senderId
                                         ? "hidden"
                                         : ""
                                     }`}>
@@ -586,11 +650,11 @@ function ChatPage() {
                                 </div>
                                 <div
                                   className={`text-xs text-white-dark ${
-                                    selectedUser.userId === message.fromUserId
+                                    selectedUser.userId === message.senderId
                                       ? "ltr:text-right rtl:text-left"
                                       : ""
                                   }`}>
-                                  {message.time ? message.time : "5h ago"}
+                                  {/* {message.time ? message.time : "5h ago"} */}
                                 </div>
                               </div>
                             </div>
@@ -655,6 +719,7 @@ function ChatPage() {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

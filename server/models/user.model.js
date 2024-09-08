@@ -40,6 +40,11 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  active: {
+    type: Boolean,
+    default: false,
+  },
+  lastOnline: { type: Date, default: Date.now },
 });
 
 // Hash the password before saving the user

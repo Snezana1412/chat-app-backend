@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext({
   isAuthenticated: false,
@@ -6,6 +6,10 @@ export const AuthContext = createContext({
   login: () => {},
   logout: () => {},
 });
+
+export const useUserContext = () => {
+  return useContext(AuthContext);
+};
 
 // Create a context with default values
 // export const AuthContext = createContext({
@@ -49,41 +53,31 @@ export const AuthProvider = ({ children }) => {
   //   </AuthContext.Provider>
   // );
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem("user")) || null
+  );
 
-  const [token, setToken] = useState(null);
-
-  let isAuthenticated = false;
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       setUser(JSON.parse(storedUser));
 
-      isAuthenticated = true;
+      setIsAuthenticated(true);
     }
   }, []);
 
   const login = (userData) => {
-    console.log("🚀 ~ login ~ userData:", userData);
-    console.log("🚀 ~ login ~ userData:", userData);
-    setToken(userData);
     setUser(userData);
-    isAuthenticated = true;
+    setIsAuthenticated(true);
     localStorage.setItem("user", JSON.stringify(userData));
     // asign context user value
   };
 
-  console.log(user, isAuthenticated, token);
-
   const logout = () => {
-    setToken(null);
-
     localStorage.removeItem("user");
   };
-  if (localStorage.getItem("user")) {
-    isAuthenticated = true;
-  }
 
   return (
     <AuthContext.Provider
