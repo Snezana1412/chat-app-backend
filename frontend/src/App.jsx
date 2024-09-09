@@ -3,24 +3,16 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Verification from "./pages/Verification";
 import ForgotPassword from "./pages/ForgotPassword";
-import Chat from "./pages/Chat";
 
 import Profile from "./pages/Profile";
-import PrivateRoute from "./components/PrivateRoute";
-import { AuthProvider, useUserContext } from "./context/AuthProvider";
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-} from "react-router-dom";
+import { AuthProvider } from "./context/AuthProvider";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import ChatPage from "./pages/ChatPage";
 
 import {
   SocketContextProvider,
   useSocketContext,
 } from "./context/SocketContext";
-import Home from "./pages/home/Home";
 
 function App() {
   const context = useSocketContext();

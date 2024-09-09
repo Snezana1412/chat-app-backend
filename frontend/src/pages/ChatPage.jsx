@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import Dropdown from "../components/Dropdown";
 import IconHorizontalDots from "../components/Icon/IconHorizontalDots";
@@ -18,20 +18,17 @@ import { useSocketContext } from "../context/SocketContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import { formatLastOnline } from "../utils/formatLastOnline";
-import { getMessages } from "../utils/api";
-
-const user = localStorage.getItem("user");
 
 function ChatPage() {
-  //   router.route("/:id").get(protect, getMessages);
-  // //router.route("/").post(protect, sendMessage);
-  // router.post("/send/:id", protectRoute, sendMessage);
-
   const context = useUserContext();
   const currentUser = context.user;
+  console.log("🚀 ~ ChatPage ~ currentUser:", currentUser);
 
-  const { loading, conversations } = useGetConversations();
+  const { conversations } = useGetConversations();
   const { selectedConversation, setSelectedConversation } = useConversation();
+  const { messages, setMessages } = useConversation();
+  console.log("🚀 ~ ChatPage ~ messages:", messages);
+  console.log("🚀 ~ ChatPage ~ selectedConversation:", selectedConversation);
 
   const { onlineUsers } = useSocketContext();
   console.log("🚀 ~ ChatPage ~ onlineUsers:", onlineUsers);
@@ -61,10 +58,9 @@ function ChatPage() {
   const socket = socketContext.socket;
   console.log("🚀 ~ ChatPage ~ socket:", socket);
 
-  const [messages, setMessages] = useState([]);
+  // eslint-disable-next-line no-unused-vars
   const [text, setText] = useState("");
 
-  const [newMessage, setNewMessage] = useState();
   useEffect(() => {
     const nm = socketContext.newMessage;
     console.log("🚀 ~ useEffect ~ nm:", nm);
@@ -72,13 +68,6 @@ function ChatPage() {
     setMessages([...messages, nm]);
     // console.log("🚀 ~ useEffect ~ messages:", messages);
   }, [socketContext]);
-  console.log("🚀 ~ useEffect ~ messages:", messages);
-  // useEffect(() => {
-  //   setNewMessage(socketContext.newMessage);
-  //   //setMessages([...messages, newMessage]);
-  // }, [socketContext.newMessage]);
-
-  // console.log("newMessage", newMessage);
 
   const isDark = false;
 
@@ -107,22 +96,6 @@ function ChatPage() {
     setSelectedConversation(user);
   };
 
-  // console.log(formatLastOnline(selectedUser.lastOnline));
-  // console.log(selectedUser);
-
-  // useEffect(() => {
-  //   const fetchMessages = async () => {
-  //     try {
-  //       const data = await getMessages(selectedUser?._id);
-  //       setMessages(data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch messages:", error);
-  //     }
-  //   };
-
-  //   fetchMessages();
-  // }, [selectedUser]);
-
   const sendMessage = async () => {
     try {
       const response = await axios({
@@ -138,40 +111,13 @@ function ChatPage() {
         console.error(error);
         throw error;
       });
-      console.log("🚀 ~ sendMessage ~ response.data:", response.data);
+
       setMessages([...messages, response.data]);
-
-      // setTimeout(() => {
-      //   const newMessage = socketContext.newMessage;
-      //   console.log("🚀 ~ setTimeout ~ newMessage:", newMessage);
-      //   setMessages([...messages, newMessage]);
-      // }, 1000);
-
-      // console.log("🚀 ~ sendMessage ~ newMessage:", newMessage);
-
-      //setMessages([...messages, newMessage]);
-
-      // setMessages((prevMessages) => [...prevMessages, newMessage]);
+      setTextMessage("");
       setText("");
     } catch (error) {
       console.error("Failed to send message:", error);
     }
-
-    console.log("🚀 ~ sendMessage ~ messages:", messages);
-    // if (textMessage.trim()) {
-    //   let list = conversations;
-    //   let user = list.find((d) => d._id === selectedUser._id);
-    //   user.messages.push({
-    //     fromUserId: selectedUser._id,
-    //     toUserId: 0,
-    //     text: textMessage,
-    //     time: "Just now",
-    //   });
-
-    //   setFilteredItems(list);
-    //   setTextMessage("");
-    //   scrollToBottom();
-    // }
   };
   const sendMessageHandle = (event) => {
     if (event.key === "Enter") {
@@ -228,25 +174,6 @@ function ChatPage() {
     console.log("🚀 ~ receivedMessage:", receivedMessage);
     setMessages([...messages, { receivedMessage }]);
   }, [socketContext.message]);
-
-  // useEffect(() => {
-  //   Initialize your socket connection (assuming you're using socket.io)
-  //   const socket = socketIOClient("http://localhost:3000", {
-  //     query: {
-  //       userId: currentUser._id,
-  //     },
-  //   });
-
-  //   Listen for new messages from the server
-  //   socket.on("newMessage", (newMessage) => {
-  //     console.log("🚀 ~ newMessage:", newMessage);
-  //     // Update the messages array with the new message
-  //     setMessages((prevMessages) => [...prevMessages, newMessage]);
-  //   });
-
-  //   Clean up the socket connection when the component unmounts
-  //   return () => socket.disconnect();
-  // }, [socket]); // Empty dependency array means this effect runs only on mount and unmount
 
   return (
     <div>
@@ -313,27 +240,7 @@ function ChatPage() {
               <IconSearch />
             </div>
           </div>
-          <div className='flex justify-between items-center text-xs'>
-            {/* <button type='button' className='hover:text-primary'>
-              <IconMessagesDot className='mx-auto mb-1' />
-              Chats
-            </button>
-
-            <button type='button' className='hover:text-primary'>
-              <IconPhone className='mx-auto mb-1' />
-              Calls
-            </button>
-
-            <button type='button' className='hover:text-primary'>
-              <IconUserPlus className='mx-auto mb-1' />
-              Contacts
-            </button>
-
-            <button type='button' className='hover:text-primary group'>
-              <IconBell className='w-5 h-5 mx-auto mb-1' />
-              Notification
-            </button> */}
-          </div>
+          <div className='flex justify-between items-center text-xs'></div>
           <div className='h-px w-full border-b border-white-light dark:border-[#1b2e4b]'></div>
           <div className='!mt-0'>
             <PerfectScrollbar className='chat-users relative h-full min-h-[100px] sm:h-[calc(100vh_-_357px)] space-y-0.5 pr-3.5 -mr-3.5 '>
@@ -368,15 +275,12 @@ function ChatPage() {
                             <p className='mb-1 font-semibold'>
                               {person.username}
                             </p>
-                            {/* <p className='text-xs text-white-dark truncate max-w-[185px]'>
-                              {person.}
-                            </p> */}
                           </div>
                         </div>
                       </div>
-                      {/* <div className='font-semibold whitespace-nowrap text-xs'>
-                        <p>{person.time}</p>
-                      </div> */}
+                      <div className='font-semibold whitespace-nowrap text-xs'>
+                        <p>{formatLastOnline(person.lastOnline).lastSeen}</p>
+                      </div>
                     </button>
                   </div>
                 );
@@ -596,56 +500,7 @@ function ChatPage() {
                     </p>
                   </div>
                 </div>
-                <div className='flex sm:gap-5 gap-3'>
-                  {/* <button type='button'>
-                    <IconPhoneCall className='hover:text-primary' />
-                  </button>
-
-                  <button type='button'>
-                    <IconVideo className='w-5 h-5 hover:text-primary' />
-                  </button> */}
-                  <div className='dropdown'>
-                    {/* <Dropdown
-                      placement={`${isRtl ? "bottom-start" : "bottom-end"}`}
-                      btnClassName='bg-[#f4f4f4] dark:bg-[#1b2e4b] hover:bg-primary-light w-8 h-8 rounded-full !flex justify-center items-center'
-                      button={
-                        <IconHorizontalDots className='hover:text-primary rotate-90 opacity-70' />
-                      }>
-                      <ul className='text-black dark:text-white-dark'>
-                        <li>
-                          <button type='button'>
-                            <IconSearch className='ltr:mr-2 rtl:ml-2 shrink-0' />
-                            Search
-                          </button>
-                        </li>
-                        <li>
-                          <button type='button'>
-                            <IconCopy className='w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0' />
-                            Copy
-                          </button>
-                        </li>
-                        <li>
-                          <button type='button'>
-                            <IconTrashLines className='w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0' />
-                            Delete
-                          </button>
-                        </li>
-                        <li>
-                          <button type='button'>
-                            <IconShare className='w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0' />
-                            Share
-                          </button>
-                        </li>
-                        <li>
-                          <button type='button'>
-                            <IconSettings className='w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 shrink-0' />
-                            Settings
-                          </button>
-                        </li>
-                      </ul>
-                    </Dropdown> */}
-                  </div>
-                </div>
+                <div className='flex sm:gap-5 gap-3'></div>
               </div>
               <div className='h-px w-full border-b border-white-light dark:border-[#1b2e4b]'></div>
 
@@ -757,21 +612,6 @@ function ChatPage() {
                     </button>
                   </div>
                   <div className='items-center space-x-3 rtl:space-x-reverse sm:py-0 py-3 hidden sm:block'>
-                    {/* <button
-                      type='button'
-                      className='bg-[#f4f4f4] dark:bg-[#1b2e4b] hover:bg-primary-light rounded-md p-2 hover:text-primary'>
-                      <IconMicrophoneOff />
-                    </button>
-                    <button
-                      type='button'
-                      className='bg-[#f4f4f4] dark:bg-[#1b2e4b] hover:bg-primary-light rounded-md p-2 hover:text-primary'>
-                      <IconDownload />
-                    </button>
-                    <button
-                      type='button'
-                      className='bg-[#f4f4f4] dark:bg-[#1b2e4b] hover:bg-primary-light rounded-md p-2 hover:text-primary'>
-                      <IconCamera />
-                    </button> */}
                     <button
                       type='button'
                       className='bg-[#f4f4f4] dark:bg-[#1b2e4b] hover:bg-primary-light rounded-md p-2 hover:text-primary'>

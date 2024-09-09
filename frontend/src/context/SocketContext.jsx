@@ -1,8 +1,8 @@
 import { createContext, useState, useEffect, useContext } from "react";
-import { useAuthContext } from "./AuthContext";
-import { io, Socket } from "socket.io-client";
+
+import { io } from "socket.io-client";
 import { useUserContext } from "./AuthProvider";
-import { Navigate, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const SocketContext = createContext();
 
@@ -12,10 +12,7 @@ export const useSocketContext = () => {
   return useContext(SocketContext);
 };
 
-// export const socket1 = io(url, {
-//   autoConnect: false,
-// });
-
+// eslint-disable-next-line react/prop-types
 export const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState();
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -28,11 +25,7 @@ export const SocketContextProvider = ({ children }) => {
   }
 
   const authUser = context.user;
-  console.log("🚀 ~ SocketContextProvider ~ authUser:", authUser);
 
-  //   router.route("/:id").get(protect, getMessages);
-  // //router.route("/").post(protect, sendMessage);
-  // router.post("/send/:id", protectRoute, sendMessage);
   const navigate = useNavigate();
   useEffect(() => {
     if (!authUser || authUser === null) {
@@ -71,7 +64,7 @@ export const SocketContextProvider = ({ children }) => {
       socket.close();
       socket.off("message");
       socket.off("msg-recieve");
-      socket.off("getOnlineUsers");
+      //socket.off("getOnlineUsers");
     };
   }, [authUser, setNewMessage, setOnlineUsers, navigate]);
 

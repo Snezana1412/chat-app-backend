@@ -1,4 +1,8 @@
 export default function Header() {
+  const logout = () => {
+    localStorage.removeItem("user");
+    window.location.reload();
+  };
   return (
     <header className='z-40'>
       <div className='shadow-sm'>
@@ -9,7 +13,11 @@ export default function Header() {
               Chat App
             </div>
             <div className='flex items-center justify-end w-full'>
-              <button className='text-gray-600 focus:outline-none mx-4 sm:mx-0'></button>
+              <button
+                className='text-gray-600 focus:outline-none mx-4 sm:mx-0'
+                onClick={logout}>
+                Logout
+              </button>
             </div>
           </div>
         </div>
