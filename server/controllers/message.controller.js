@@ -4,12 +4,6 @@ import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const sendMessage = async (req, res) => {
   const { senderId, receiverId, message } = req.body;
-  console.log(
-    "🚀 ~ sendMessage ~  sender, receiver, text:",
-    senderId,
-    receiverId,
-    message
-  );
 
   try {
     let conversation = await Conversation.findOne({
@@ -31,7 +25,7 @@ export const sendMessage = async (req, res) => {
       message,
       conversation: conversation._id,
     });
-    console.log("🚀 ~ sendMessage ~ newMessage:", newMessage);
+    //console.log("🚀 ~ sendMessage ~ newMessage:", newMessage);
 
     await newMessage.save();
 
@@ -54,7 +48,6 @@ export const getMessages = async (req, res) => {
   //const { sender, receiver } = req.query;
 
   const { userId, receiverId } = req.query;
-  console.log("🚀 ~ getMessages ~ userId, receiverId", userId, receiverId);
 
   // const { id: userToChatId } = req.params;
   // const sender = req.user._id;

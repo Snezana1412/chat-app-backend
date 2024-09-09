@@ -46,7 +46,6 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    console.log(user);
     // console.log(e);
     // Add registration logic here (e.g., call API)
 

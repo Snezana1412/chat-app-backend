@@ -19,9 +19,9 @@ export const useSocketContext = () => {
 export const SocketContextProvider = ({ children }) => {
   const [socket, setSocket] = useState();
   const [onlineUsers, setOnlineUsers] = useState([]);
-  const { messages, setMessages } = useState();
+  // const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState();
   const context = useUserContext();
-  console.log("🚀 ~ SocketContextProvider ~ context:", context);
 
   if (context.isAuthenticated) {
     context.isAuthenticated = true;
@@ -29,12 +29,9 @@ export const SocketContextProvider = ({ children }) => {
 
   const authUser = context.user;
 
-  console.log("🚀 ~ SocketContextProvider ~ authUser:", authUser);
-
   //   router.route("/:id").get(protect, getMessages);
   // //router.route("/").post(protect, sendMessage);
   // router.post("/send/:id", protectRoute, sendMessage);
-  console.log("🚀 ~ socket1:", socket);
   const navigate = useNavigate();
   useEffect(() => {
     if (!authUser || authUser === null) {
@@ -56,20 +53,27 @@ export const SocketContextProvider = ({ children }) => {
 
     // socket.on() is used to listen to the events. can be used both on client and server side
     socket.on("getOnlineUsers", (users) => {
-      console.log("🚀 ~ socket.on ~ users:", users);
       setOnlineUsers(users);
     });
 
-    socket.on("message", (newMessage) => {
-      console.log("🚀 ~ socket.on ~ data:", newMessage);
-      setMessages(newMessage);
+    socket.on("message", (message) => {
+      console.log("🚀 ~ socket.on ~ message:", message);
+      setNewMessage(message);
     });
 
-    return () => socket.close();
-  }, [authUser, setMessages, setOnlineUsers, navigate]);
+    socket.on("msg-recieve", (message) => {
+      console.log("🚀 ~ socket.on ~ message", message);
+      setNewMessage(message);
+    });
+
+    return () => {
+      socket.close();
+      socket.off("message");
+    };
+  }, [authUser, setNewMessage, setOnlineUsers, navigate]);
 
   return (
-    <SocketContext.Provider value={{ socket, onlineUsers, messages }}>
+    <SocketContext.Provider value={{ socket, onlineUsers, newMessage }}>
       {children}
     </SocketContext.Provider>
   );

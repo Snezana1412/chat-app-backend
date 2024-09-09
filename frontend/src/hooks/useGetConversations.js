@@ -17,7 +17,6 @@ const useGetConversations = () => {
         });
         // const res = await fetch("/api/users");
         // const data = await res.json();
-        console.log("🚀 ~ getConversations ~ data:", data);
         if (data.error) {
           throw new Error(data.error);
         }

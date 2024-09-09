@@ -60,7 +60,6 @@ export const protect = async (req, res, next) => {
 
     // verify the payload
     const userId = await User.findById(token_payload.userId);
-    console.log("🚀 ~ protect ~ userId:", userId);
     if (!userId) {
       throw createError("User already deleted!", 401);
     }

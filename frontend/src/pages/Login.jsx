@@ -20,7 +20,6 @@ const Login = () => {
   const changeHandler = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
-  console.log(user);
   // define validation schema for user
   const loginSchema = Yup.object({
     username: Yup.string().required("Email address is required"),
@@ -38,7 +37,6 @@ const Login = () => {
     // Implement login logic here
     try {
       await loginSchema.validate(user, { abortEarly: false, strict: false });
-      console.log("🚀 ~ handleSubmit ~ user:", user);
       //login(user); // login user
       const res = await axios({
         url: "http://localhost:3000/api/users/login",
@@ -49,16 +47,13 @@ const Login = () => {
         console.error(error);
         throw error;
       });
-      console.log(res);
 
       setStatus(res.status === 200 ? true : false);
-      console.log(res.data);
       login(res.data.user);
       navigate("/chat-app");
     } catch (error) {
       // backend error
       if (error.response) {
-        // console.log(error.response)
         setBeError(error.response.data.msg);
       }
 

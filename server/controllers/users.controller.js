@@ -11,7 +11,6 @@ dotenv.config();
 
 /* ----------------- register ----------------- */
 export const register = async (req, res, next) => {
-  console.log(req.body, "req.body");
   try {
     const { fullName, username, email, password, gender } = req.body;
 
@@ -93,10 +92,8 @@ export const handleVerifyLink = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    console.log("🚀 ~ login ~ username, password:", username, password);
     // find user by username
     const user = await User.findOne({ username, is_activated: true });
-    console.log("🚀 ~ login ~ user:", user);
     if (!user) {
       throw createError("Incorrect username/password!", 403);
     }

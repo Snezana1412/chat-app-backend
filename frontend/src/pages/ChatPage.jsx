@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
 import Dropdown from "../components/Dropdown";
 import IconHorizontalDots from "../components/Icon/IconHorizontalDots";
@@ -28,7 +28,6 @@ function ChatPage() {
   // router.post("/send/:id", protectRoute, sendMessage);
 
   const context = useUserContext();
-  console.log("🚀 ~ ChatPage ~ context:", context);
   const currentUser = context.user;
 
   const { loading, conversations } = useGetConversations();
@@ -36,6 +35,8 @@ function ChatPage() {
 
   const { onlineUsers } = useSocketContext();
   console.log("🚀 ~ ChatPage ~ onlineUsers:", onlineUsers);
+  const { message } = useSocketContext();
+  console.log("🚀 ~ ChatPage ~ message:", message);
 
   useEffect(() => {
     onlineUsers.forEach((user) => {
@@ -49,7 +50,6 @@ function ChatPage() {
 
   const [isShowChatMenu, setIsShowChatMenu] = useState(false);
   const [searchUser, setSearchUser] = useState("");
-  console.log("🚀 ~ ChatPage ~ searchUser:", searchUser);
   const [isShowUserChat, setIsShowUserChat] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [textMessage, setTextMessage] = useState("");
@@ -57,8 +57,18 @@ function ChatPage() {
 
   const socketContext = useSocketContext();
   console.log("🚀 ~ ChatPage ~ socketContext:", socketContext);
+
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
+
+  const [newMessage, setNewMessage] = useState();
+
+  // useEffect(() => {
+  //   setNewMessage(socketContext.newMessage);
+  //   //setMessages([...messages, newMessage]);
+  // }, [socketContext.newMessage]);
+
+  console.log("newMessage", newMessage);
 
   const isDark = false;
 
@@ -86,6 +96,7 @@ function ChatPage() {
     setIsShowChatMenu(false);
     setSelectedConversation(user);
   };
+
   // console.log(formatLastOnline(selectedUser.lastOnline));
   // console.log(selectedUser);
 
@@ -103,12 +114,6 @@ function ChatPage() {
   // }, [selectedUser]);
 
   const sendMessage = async () => {
-    console.log("selectUser", selectedUser);
-    console.log("textMessage", textMessage);
-    console.log("conversations", conversations);
-    console.log("selectedConversation", selectedConversation);
-
-    console.log("currentUser", currentUser);
     try {
       const response = await axios({
         method: "POST",
@@ -123,13 +128,25 @@ function ChatPage() {
         console.error(error);
         throw error;
       });
-      console.log(response);
+
+      setMessages([...messages, response.data]);
+
+      // setTimeout(() => {
+      //   const newMessage = socketContext.newMessage;
+      //   console.log("🚀 ~ setTimeout ~ newMessage:", newMessage);
+      //   setMessages([...messages, newMessage]);
+      // }, 1000);
+
+      // console.log("🚀 ~ sendMessage ~ newMessage:", newMessage);
+
+      //setMessages([...messages, newMessage]);
 
       // setMessages((prevMessages) => [...prevMessages, newMessage]);
       setText("");
     } catch (error) {
       console.error("Failed to send message:", error);
     }
+    console.log("🚀 ~ sendMessage ~ messages:", messages);
     // if (textMessage.trim()) {
     //   let list = conversations;
     //   let user = list.find((d) => d._id === selectedUser._id);
@@ -162,6 +179,7 @@ function ChatPage() {
         },
         withCredentials: true,
       });
+
       return response.data;
     } catch (error) {
       console.error("Error fetching messages:", error);
@@ -182,6 +200,31 @@ function ChatPage() {
 
     fetchMessages();
   }, [selectedUser, currentUser]);
+
+  useEffect(() => {
+    const receivedMessage = socketContext.message;
+    console.log("🚀 ~ receivedMessage:", receivedMessage);
+    setMessages([...messages, { receivedMessage }]);
+  }, [socketContext.message]);
+
+  // useEffect(() => {
+  //   Initialize your socket connection (assuming you're using socket.io)
+  //   const socket = socketIOClient("http://localhost:3000", {
+  //     query: {
+  //       userId: currentUser._id,
+  //     },
+  //   });
+
+  //   Listen for new messages from the server
+  //   socket.on("newMessage", (newMessage) => {
+  //     console.log("🚀 ~ newMessage:", newMessage);
+  //     // Update the messages array with the new message
+  //     setMessages((prevMessages) => [...prevMessages, newMessage]);
+  //   });
+
+  //   Clean up the socket connection when the component unmounts
+  //   return () => socket.disconnect();
+  // }, [socket]); // Empty dependency array means this effect runs only on mount and unmount
 
   return (
     <div>
@@ -600,17 +643,17 @@ function ChatPage() {
                           <div key={index}>
                             <div
                               className={`flex items-start gap-3 ${
-                                currentUser.userId === message.senderId
+                                currentUser._id === message.receiverId
                                   ? "justify-end"
                                   : ""
                               }`}>
                               <div
                                 className={`flex-none ${
-                                  selectedUser.userId === message.senderId
+                                  selectedUser._id === message.senderId
                                     ? "order-2"
                                     : ""
                                 }`}>
-                                {selectedUser.userId === message.senderId ? (
+                                {selectedUser._id === message.receiverId ? (
                                   <img
                                     src={`/assets/images/${currentUser.profilePicture}`}
                                     className='rounded-full h-10 w-10 object-cover'
@@ -619,7 +662,7 @@ function ChatPage() {
                                 ) : (
                                   ""
                                 )}
-                                {selectedUser.userId !== message.senderId ? (
+                                {selectedUser._id !== message.receiverId ? (
                                   <img
                                     src={`/assets/images/${selectedUser.profilePicture}`}
                                     className='rounded-full h-10 w-10 object-cover'
@@ -633,7 +676,7 @@ function ChatPage() {
                                 <div className='flex items-center gap-3'>
                                   <div
                                     className={`dark:bg-gray-800 p-4 py-2 rounded-md bg-black/10 ${
-                                      message.fromUserId === selectedUser.userId
+                                      message.receiverId === selectedUser.userId
                                         ? "ltr:rounded-br-none rtl:rounded-bl-none !bg-primary text-white"
                                         : "ltr:rounded-bl-none rtl:rounded-br-none"
                                     }`}>

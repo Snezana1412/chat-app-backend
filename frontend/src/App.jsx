@@ -21,9 +21,7 @@ import Home from "./pages/home/Home";
 
 function App() {
   const context = useUserContext();
-  console.log("🚀 ~ App ~ context:", context);
   const isAuthenticated = context.isAuthenticated;
-  console.log("🚀 ~ App ~ isAuthenticated:", isAuthenticated);
   return (
     <Router>
       <AuthProvider>
