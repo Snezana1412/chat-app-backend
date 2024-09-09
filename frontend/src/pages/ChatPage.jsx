@@ -58,17 +58,27 @@ function ChatPage() {
   const socketContext = useSocketContext();
   console.log("🚀 ~ ChatPage ~ socketContext:", socketContext);
 
+  const socket = socketContext.socket;
+  console.log("🚀 ~ ChatPage ~ socket:", socket);
+
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
 
   const [newMessage, setNewMessage] = useState();
-
+  useEffect(() => {
+    const nm = socketContext.newMessage;
+    console.log("🚀 ~ useEffect ~ nm:", nm);
+    //setNewMessage(socketContext?.newMessage);
+    setMessages([...messages, nm]);
+    // console.log("🚀 ~ useEffect ~ messages:", messages);
+  }, [socketContext]);
+  console.log("🚀 ~ useEffect ~ messages:", messages);
   // useEffect(() => {
   //   setNewMessage(socketContext.newMessage);
   //   //setMessages([...messages, newMessage]);
   // }, [socketContext.newMessage]);
 
-  console.log("newMessage", newMessage);
+  // console.log("newMessage", newMessage);
 
   const isDark = false;
 
@@ -128,7 +138,7 @@ function ChatPage() {
         console.error(error);
         throw error;
       });
-
+      console.log("🚀 ~ sendMessage ~ response.data:", response.data);
       setMessages([...messages, response.data]);
 
       // setTimeout(() => {
@@ -146,6 +156,7 @@ function ChatPage() {
     } catch (error) {
       console.error("Failed to send message:", error);
     }
+
     console.log("🚀 ~ sendMessage ~ messages:", messages);
     // if (textMessage.trim()) {
     //   let list = conversations;
@@ -287,7 +298,7 @@ function ChatPage() {
               value={searchUser}
               onChange={(e) => setSearchUser(e.target.value)}
             />
-            <div className='absolute ltr:right-2 rtl:left-2 top-1/2 -translate-y-1/2 peer-focus:text-primary'>
+            <div className='absolute right-2 top-1/2 -translate-y-1/2 peer-focus:text-primary'>
               <IconSearch />
             </div>
           </div>
@@ -314,7 +325,7 @@ function ChatPage() {
           </div>
           <div className='h-px w-full border-b border-white-light dark:border-[#1b2e4b]'></div>
           <div className='!mt-0'>
-            <PerfectScrollbar className='chat-users relative h-full min-h-[100px] sm:h-[calc(100vh_-_357px)] space-y-0.5 ltr:pr-3.5 rtl:pl-3.5 ltr:-mr-3.5 rtl:-ml-3.5'>
+            <PerfectScrollbar className='chat-users relative h-full min-h-[100px] sm:h-[calc(100vh_-_357px)] space-y-0.5 pr-3.5 -mr-3.5 '>
               {filteredItems.map((person) => {
                 return (
                   <div key={person._id}>
