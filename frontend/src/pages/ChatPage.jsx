@@ -201,9 +201,20 @@ function ChatPage() {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const data = await getMessages(currentUser._id, selectedUser._id);
+        const data = await getMessages(currentUser?._id, selectedUser?._id)
+          .then((response) => {
+            console.log("🚀 ~ fetchMessages ~ response", response);
+            return response;
+          })
+          .catch((error) => {
+            console.error("Failed to fetch messages:", error);
+            throw error;
+          });
         console.log("messages", data);
-        setMessages(data);
+        //console.log("messages", data);
+        if (data) {
+          setMessages(data);
+        }
       } catch (error) {
         console.error("Failed to fetch messages:", error);
       }
@@ -566,7 +577,7 @@ function ChatPage() {
                   </button>
                   <div className='relative flex-none'>
                     <img
-                      src={`/assets/images/${selectedUser.profilePicture}`}
+                      src={`${selectedUser.profilePicture}`}
                       className='rounded-full w-10 h-10 sm:h-12 sm:w-12 object-cover'
                       alt=''
                     />
@@ -643,7 +654,8 @@ function ChatPage() {
                   <div className='block m-6 mt-0'>
                     <h4 className='text-xs text-center border-b border-[#f4f4f4] dark:border-gray-800 relative'>
                       <span className='relative top-2 px-3 bg-white dark:bg-black'>
-                        {"Today, " + "selectedUser.time"}
+                        {"Today, " +
+                          formatLastOnline(selectedUser.lastOnline).lastSeen}
                       </span>
                     </h4>
                   </div>
@@ -654,28 +666,28 @@ function ChatPage() {
                           <div key={index}>
                             <div
                               className={`flex items-start gap-3 ${
-                                currentUser._id === message.receiverId
+                                currentUser._id === message?.receiverId
                                   ? "justify-end"
                                   : ""
                               }`}>
                               <div
                                 className={`flex-none ${
-                                  selectedUser._id === message.senderId
+                                  selectedUser._id === message?.senderId
                                     ? "order-2"
                                     : ""
                                 }`}>
-                                {selectedUser._id === message.receiverId ? (
+                                {selectedUser._id === message?.receiverId ? (
                                   <img
-                                    src={`/assets/images/${currentUser.profilePicture}`}
+                                    src={`${currentUser.profilePicture}`}
                                     className='rounded-full h-10 w-10 object-cover'
                                     alt=''
                                   />
                                 ) : (
                                   ""
                                 )}
-                                {selectedUser._id !== message.receiverId ? (
+                                {selectedUser._id !== message?.receiverId ? (
                                   <img
-                                    src={`/assets/images/${selectedUser.profilePicture}`}
+                                    src={`${selectedUser.profilePicture}`}
                                     className='rounded-full h-10 w-10 object-cover'
                                     alt=''
                                   />
@@ -687,15 +699,16 @@ function ChatPage() {
                                 <div className='flex items-center gap-3'>
                                   <div
                                     className={`dark:bg-gray-800 p-4 py-2 rounded-md bg-black/10 ${
-                                      message.receiverId === selectedUser.userId
+                                      message?.receiverId ===
+                                      selectedUser.userId
                                         ? "ltr:rounded-br-none rtl:rounded-bl-none !bg-primary text-white"
                                         : "ltr:rounded-bl-none rtl:rounded-br-none"
                                     }`}>
-                                    {message.message}
+                                    {message?.message}
                                   </div>
                                   <div
                                     className={`${
-                                      selectedUser.userId === message.senderId
+                                      selectedUser.userId === message?.senderId
                                         ? "hidden"
                                         : ""
                                     }`}>
@@ -704,7 +717,7 @@ function ChatPage() {
                                 </div>
                                 <div
                                   className={`text-xs text-white-dark ${
-                                    selectedUser.userId === message.senderId
+                                    selectedUser.userId === message?.senderId
                                       ? "ltr:text-right rtl:text-left"
                                       : ""
                                   }`}>

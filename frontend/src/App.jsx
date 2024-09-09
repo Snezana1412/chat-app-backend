@@ -16,12 +16,17 @@ import {
 } from "react-router-dom";
 import ChatPage from "./pages/ChatPage";
 
-import { SocketContextProvider } from "./context/SocketContext";
+import {
+  SocketContextProvider,
+  useSocketContext,
+} from "./context/SocketContext";
 import Home from "./pages/home/Home";
 
 function App() {
-  const context = useUserContext();
-  const isAuthenticated = context.isAuthenticated;
+  const context = useSocketContext();
+  console.log("🚀 ~ App ~ context:", context);
+  //const isAuthenticated = false;
+  // console.log("🚀 ~ App ~ isAuthenticated:", isAuthenticated);
   return (
     <Router>
       <AuthProvider>
@@ -34,8 +39,15 @@ function App() {
               element={<Verification />}
             />
             <Route path='/forgot-password' element={<ForgotPassword />} />
-            <Route path='/' element={<ChatPage />} />
-            <Route path='/chat-app' element={<ChatPage />} />
+            {/* <Route
+              path='/'
+              element={isAuthenticated ? <ChatPage /> : <Login />}
+            />
+            <Route
+              path='/chat-app'
+              element={isAuthenticated ? <ChatPage /> : <Login />}
+            /> */}
+            <Route path='/chat-page' element={<ChatPage />} />
 
             <Route path='/profile' element={<Profile />} />
           </Routes>

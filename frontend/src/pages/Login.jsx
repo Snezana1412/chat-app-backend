@@ -36,7 +36,11 @@ const Login = () => {
     e.preventDefault();
     // Implement login logic here
     try {
-      await loginSchema.validate(user, { abortEarly: false, strict: false });
+      await loginSchema
+        .validate(user, { abortEarly: false, strict: false })
+        .then((val) => console.log(val))
+        .catch((err) => console.log(err.errors));
+
       //login(user); // login user
       const res = await axios({
         url: "http://localhost:3000/api/users/login",
@@ -50,7 +54,7 @@ const Login = () => {
 
       setStatus(res.status === 200 ? true : false);
       login(res.data.user);
-      navigate("/chat-app");
+      navigate("/chat-page");
     } catch (error) {
       // backend error
       if (error.response) {

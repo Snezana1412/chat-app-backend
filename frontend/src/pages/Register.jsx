@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import * as Yup from "yup";
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
   const [user, setUser] = useState({
@@ -13,6 +14,8 @@ const Register = () => {
   const [status, setStatus] = useState(false);
   const [errors, setErrors] = useState(null);
   const [message, setMessage] = useState("");
+
+  const navigate = useNavigate();
 
   // user validation - schema
   const userSchema = Yup.object().shape({
@@ -55,6 +58,9 @@ const Register = () => {
       //I've got all the errors just by writing err.errors in message.
       //.catch((err) => console.log(err.errors));
       // validate user based on the userSchema
+      // if validation fails, catch block will be executed
+      // if validation passes, then catch block will be skipped
+
       // send request to backend
       const res = await axios({
         url: "http://localhost:3000/api/users/register",
@@ -67,6 +73,7 @@ const Register = () => {
       });
 
       setStatus(res.statusText === "Created" ? true : false);
+      navigate("/chat-app");
 
       if (res.statusText === "Created") {
         console.log("Created    ");
@@ -75,6 +82,7 @@ const Register = () => {
         setMessage(res.data.message);
       }
     } catch (error) {
+      console.log(errors);
       // handle validation errors
       if (error.response) {
         setErrors({ ...errors, res: error.response.data.errors[0].msg });
@@ -84,6 +92,7 @@ const Register = () => {
       const newErrors = {};
       if (error.name === "ValidationError") {
         error.inner.forEach((err) => {
+          console.log("🚀 ~ error.inner.forEach ~ err:", err);
           newErrors[err.path] = err.message;
         });
         setErrors(newErrors);
@@ -232,6 +241,9 @@ const Register = () => {
                 </label>
               </div>
             </div>
+            {errors?.gender && (
+              <div className='text-red-500 text-sm p-2'>{errors?.gender}</div>
+            )}
           </div>
 
           <div className='flex items-center justify-between'>

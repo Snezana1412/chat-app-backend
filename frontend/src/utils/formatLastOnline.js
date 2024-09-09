@@ -2,6 +2,7 @@ import { formatDistanceToNow, format } from "date-fns";
 
 export const formatLastOnline = (lastOnline) => {
   const lastOnlineDate = new Date(lastOnline);
+  console.log("🚀 ~ formatLastOnline ~ lastOnlineDate:", lastOnlineDate);
   const isRecent = new Date() - lastOnlineDate < 7 * 24 * 60 * 60 * 1000; // Within 7 days
 
   return {

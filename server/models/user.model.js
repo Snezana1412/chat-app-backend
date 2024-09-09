@@ -33,8 +33,7 @@ const userSchema = new Schema({
   },
   profilePicture: {
     type: String,
-    default:
-      "https://www.kindpng.com/picc/m/78-785827_user-profile-avatar-login-account",
+    default: "https://i.pravatar.cc/150?img=3",
   },
   create_at: {
     type: Date,

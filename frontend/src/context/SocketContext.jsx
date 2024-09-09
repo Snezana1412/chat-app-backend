@@ -28,6 +28,7 @@ export const SocketContextProvider = ({ children }) => {
   }
 
   const authUser = context.user;
+  console.log("🚀 ~ SocketContextProvider ~ authUser:", authUser);
 
   //   router.route("/:id").get(protect, getMessages);
   // //router.route("/").post(protect, sendMessage);
@@ -69,6 +70,8 @@ export const SocketContextProvider = ({ children }) => {
     return () => {
       socket.close();
       socket.off("message");
+      socket.off("msg-recieve");
+      socket.off("getOnlineUsers");
     };
   }, [authUser, setNewMessage, setOnlineUsers, navigate]);
 
