@@ -22,18 +22,12 @@ import { formatLastOnline } from "../utils/formatLastOnline";
 function ChatPage() {
   const context = useUserContext();
   const currentUser = context.user;
-  console.log("🚀 ~ ChatPage ~ currentUser:", currentUser);
 
   const { conversations } = useGetConversations();
   const { selectedConversation, setSelectedConversation } = useConversation();
   const { messages, setMessages } = useConversation();
-  console.log("🚀 ~ ChatPage ~ messages:", messages);
-  console.log("🚀 ~ ChatPage ~ selectedConversation:", selectedConversation);
 
   const { onlineUsers } = useSocketContext();
-  console.log("🚀 ~ ChatPage ~ onlineUsers:", onlineUsers);
-  const { message } = useSocketContext();
-  console.log("🚀 ~ ChatPage ~ message:", message);
 
   useEffect(() => {
     onlineUsers.forEach((user) => {
@@ -53,21 +47,14 @@ function ChatPage() {
   const [filteredItems, setFilteredItems] = useState(conversations);
 
   const socketContext = useSocketContext();
-  console.log("🚀 ~ ChatPage ~ socketContext:", socketContext);
-
-  const socket = socketContext.socket;
-  console.log("🚀 ~ ChatPage ~ socket:", socket);
 
   // eslint-disable-next-line no-unused-vars
   const [text, setText] = useState("");
 
   useEffect(() => {
-    const nm = socketContext.newMessage;
-    console.log("🚀 ~ useEffect ~ nm:", nm);
-    //setNewMessage(socketContext?.newMessage);
-    setMessages([...messages, nm]);
-    // console.log("🚀 ~ useEffect ~ messages:", messages);
-  }, [socketContext]);
+    const newMessage = socketContext.newMessage;
+    setMessages([...messages, newMessage]);
+  }, [socketContext.newMessage]);
 
   const isDark = false;
 
@@ -179,7 +166,7 @@ function ChatPage() {
     <div>
       <Header />
       <div
-        className={`flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full sm:min-h-0 ${
+        className={`flex gap-5 relative sm:h-[calc(100vh_-_150px)] h-full h- sm:min-h-0 ${
           isShowChatMenu ? "min-h-[999px]" : ""
         }`}>
         <div
